@@ -321,13 +321,35 @@ Public Class BetFairDatabaseClass
                                         Dim dblRating As Double = odds / dbBetfairPrice * 100
 
                                         ' Resolve bookmaker to image
-                                        Dim strBookmakerImage As String = "/images/noimage.png"
+                                        'Dim strBookmakerImage As String = "/images/noimage.png"
+                                        Dim strBookmakerImage As String = "/images/" + provider_name + ".png"
+
                                         If provider_name = "Bet365" Then
                                             strBookmakerImage = "/images/bet365.png"
+
                                         ElseIf provider_name = "Betfair Exchange" Then
                                             strBookmakerImage = "/images/betfair_h.gif"
+
                                         ElseIf provider_name = "William Hill" Then
                                             strBookmakerImage = "/images/wh.png"
+
+                                        ElseIf provider_name = "Coral" Then
+                                            strBookmakerImage = "/images/coral_h.gif"
+
+                                        ElseIf provider_name = "Ladbrokes" Then
+                                            strBookmakerImage = "/images/ladbrokes.png"
+
+                                        ElseIf provider_name = "Paddy Power" Then
+                                            strBookmakerImage = "/images/paddy_power.png"
+
+                                        ElseIf provider_name = "Stan" Then
+                                            strBookmakerImage = "/images/stan.png"
+
+                                        ElseIf provider_name = "Intralot.it" Then
+                                            strBookmakerImage = "/images/intralot.png"
+
+                                        ElseIf provider_name = "24hPoker" Then
+                                            strBookmakerImage = "/images/24hPoker.png"
                                         End If
 
                                         'Create instance of Matched Event class

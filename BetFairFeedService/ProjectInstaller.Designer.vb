@@ -28,7 +28,7 @@
 
         Me.ServiceProcessInstaller1 = New System.ServiceProcess.ServiceProcessInstaller
 
-        Me.BetFairFeedService = New System.ServiceProcess.ServiceInstaller
+        Me.HousekeepOddsDatabaseService = New System.ServiceProcess.ServiceInstaller
 
         '
         'ServiceProcessInstaller1
@@ -38,17 +38,17 @@
         Me.ServiceProcessInstaller1.Username = Nothing
 
         '
-        'BetFairFeedService
+        'HousekeepOddsDatabaseService
         '
-        Me.BetFairFeedService.Description = "BetFair Feed Service"
-        Me.BetFairFeedService.DisplayName = "BetFairFeedService"
-        Me.BetFairFeedService.ServiceName = "BetFairFeedService"
-        Me.BetFairFeedService.StartType = System.ServiceProcess.ServiceStartMode.Automatic
+        Me.HousekeepOddsDatabaseService.Description = "Housekeep Odds Database"
+        Me.HousekeepOddsDatabaseService.DisplayName = "HousekeepOddsDatabaseService"
+        Me.HousekeepOddsDatabaseService.ServiceName = "HousekeepOddsDatabaseService"
+        Me.HousekeepOddsDatabaseService.StartType = System.ServiceProcess.ServiceStartMode.Automatic
 
         '
         'ProjectInstaller
         '
-        Me.Installers.AddRange(New System.Configuration.Install.Installer() {Me.ServiceProcessInstaller1, Me.BetFairFeedService})
+        Me.Installers.AddRange(New System.Configuration.Install.Installer() {Me.ServiceProcessInstaller1, Me.HousekeepOddsDatabaseService})
 
     End Sub
 
@@ -70,13 +70,13 @@
 
         Dim serviceName As String = Context.Parameters("servicename")
         If Not String.IsNullOrEmpty(serviceName) Then
-            Me.BetFairFeedService.DisplayName = serviceName
-            Me.BetFairFeedService.ServiceName = serviceName
+            Me.HousekeepOddsDatabaseService.DisplayName = serviceName
+            Me.HousekeepOddsDatabaseService.ServiceName = serviceName
         End If
 
     End Sub
 
     Friend WithEvents ServiceProcessInstaller1 As System.ServiceProcess.ServiceProcessInstaller
-    Friend WithEvents BetFairFeedService As System.ServiceProcess.ServiceInstaller
+    Friend WithEvents HousekeepOddsDatabaseService As System.ServiceProcess.ServiceInstaller
 
 End Class
