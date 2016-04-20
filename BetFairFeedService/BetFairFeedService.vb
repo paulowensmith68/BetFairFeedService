@@ -128,15 +128,16 @@ Public Class Worker
             BetFairDatabase1.PollBetFairEvents(1, "MATCH_ODDS", 50, marketCountriesUkOnly)
             BetFairDatabase1 = Nothing
 
+            ' Europe leagues
+            Dim BetFairDatabase2 As New BetFairDatabaseClass()
+            BetFairDatabase2.PollBetFairEvents(1, "MATCH_ODDS", 20, marketCountriesEurope)
+            BetFairDatabase2 = Nothing
+
             ' Match new odds
             Dim BetFairDbOddsMatch1 As New BetFairDatabaseClass()
             BetFairDbOddsMatch1.MatchWithBookmakers(1, "MATCH_ODDS")
             BetFairDbOddsMatch1 = Nothing
 
-            ' Europe leagues
-            Dim BetFairDatabase2 As New BetFairDatabaseClass()
-            BetFairDatabase2.PollBetFairEvents(1, "MATCH_ODDS", 20, marketCountriesEurope)
-            BetFairDatabase2 = Nothing
 
             Dim BetFairDatabase3 As New BetFairDatabaseClass()
             BetFairDatabase3.PollBetFairEvents(1, "HALF_TIME", 50, marketCountriesUkOnly)

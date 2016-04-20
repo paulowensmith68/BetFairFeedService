@@ -342,7 +342,7 @@ Public Class BetFairDatabaseClass
                                         ElseIf provider_name = "Paddy Power" Then
                                             strBookmakerImage = "/images/paddy_power.png"
 
-                                        ElseIf provider_name = "Stan" Then
+                                        ElseIf provider_name = "Stan James" Then
                                             strBookmakerImage = "/images/stan.png"
 
                                         ElseIf provider_name = "Intralot.it" Then
