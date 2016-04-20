@@ -15,7 +15,7 @@ Public Class BetFairDatabaseClass
     Private insertCount As Integer = 0
     Private updateCount As Integer = 0
 
-    Public Sub PollBetFairEvents(eventTypeId As Integer, marketTypeCode As String, maxResults As String, marketCountries As HashSet(Of String))
+    Public Sub PollBetFairEvents(eventTypeId As Integer, marketTypeCode As String, maxResults As String, marketCountries As HashSet(Of String), blnDeleteAll As Boolean)
 
         Dim Account As New AccountClass()
         Dim newEvent As BefFairFootballEventClass
@@ -154,7 +154,7 @@ Public Class BetFairDatabaseClass
         '' Write to database
         Dim strResult As String
         gobjEvent.WriteToEventLog("BetFairDatabaseClass : Starting database update . . . . ", EventLogEntryType.Information)
-        strResult = WriteEventList(eventTypeId, marketTypeCode)
+        strResult = WriteEventList(eventTypeId, marketTypeCode, blnDeleteAll)
         gobjEvent.WriteToEventLog("BetFairDatabaseClass : Response from Database Update: : " + strResult, EventLogEntryType.Information)
 
     End Sub
@@ -502,7 +502,7 @@ Public Class BetFairDatabaseClass
         Return strReturn
     End Function
 
-    Private Function WriteEventList(eventTypeId As Integer, marketTypeCode As String) As String ''
+    Private Function WriteEventList(eventTypeId As Integer, marketTypeCode As String, blnDeleteAll As Boolean) As String ''
         Dim cno As New MySqlConnection
         Dim cmd_del As New MySqlCommand
         Dim cmd As New MySqlCommand
@@ -543,10 +543,15 @@ Public Class BetFairDatabaseClass
             cmd.Transaction = SQLtrans
             Try
 
-                'Ok, delete all rows first
-                cmd_del.Parameters("@eventTypeId").Value = eventTypeId
-                cmd_del.Parameters("@marketTypeCode").Value = marketTypeCode
-                num_del += cmd_del.ExecuteNonQuery
+                ' Delete all first at start of refresh
+                If blnDeleteAll Then
+
+                    'Ok, delete all rows first
+                    cmd_del.Parameters("@eventTypeId").Value = eventTypeId
+                    cmd_del.Parameters("@marketTypeCode").Value = marketTypeCode
+                    num_del += cmd_del.ExecuteNonQuery
+
+                End If
 
                 'Ok, this is where the inserts really take place. All the stuff around
                 'is just to prepare for this and handle errors that may occur.
