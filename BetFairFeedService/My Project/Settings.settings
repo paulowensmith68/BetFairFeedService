@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="ProcessCycleEverySecs" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">720</Value>
+      <Value Profile="(Default)">120</Value>
     </Setting>
     <Setting Name="ProcessLogPath" Type="System.String" Scope="User">
       <Value Profile="(Default)">C:\#myPrograms\BetFairFeedService\logs\</Value>

@@ -56,7 +56,7 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("720")>  _
+         Global.System.Configuration.DefaultSettingValueAttribute("120")>  _
         Public Property ProcessCycleEverySecs() As Integer
             Get
                 Return CType(Me("ProcessCycleEverySecs"),Integer)
