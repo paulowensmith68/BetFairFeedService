@@ -1,6 +1,7 @@
 ﻿Imports MySql.Data.MySqlClient
 Imports BetFairFeedService.Api_ng_sample_code.TO
 Imports BetFairFeedService.Api_ng_sample_code
+
 Public Class BetFairDatabaseClass
 
     ' Holds the connection string to the database used.
@@ -200,7 +201,7 @@ Public Class BetFairDatabaseClass
 
                 While drBetfairEvents.Read()
 
-                    ' Declare fro later
+                    ' Declare for later
                     Dim intEventIdSpocosy As Integer
 
                     ' Declare and populate fields
@@ -225,7 +226,10 @@ Public Class BetFairDatabaseClass
                     ' \----------------------------------------------------------------/
                     cmdEvent.CommandText = "select `id`, date_format(startDate, '%Y-%m-%d') from event AS e where e.`name` =@eventName"
                     strConvertedDeatils = ConvertEventName(eventTypeId, strBetfairEventName)
-                    cmdEvent.Parameters.AddWithValue("eventName", ConvertEventName(eventTypeId, strBetfairEventName))
+                    cmdEvent.Parameters.AddWithValue("eventName", strConvertedDeatils)
+
+                    ' Reset matched event id
+                    intEventIdSpocosy = 0
 
                     Try
                         cno2.Open()
@@ -252,8 +256,58 @@ Public Class BetFairDatabaseClass
                     End Try
 
 
-                    ' Get the bet offers
+                    '
+                    ' Attempt a fuzzy match, using wilcard name and date
+                    '
+                    If intEventIdSpocosy = 0 Then
 
+                        ' Open new cursor
+                        Dim cno3 As MySqlConnection = New MySqlConnection(connectionString)
+                        Dim drFuzzyEvent As MySqlDataReader
+                        Dim cmdFuzzyEvent As New MySqlCommand
+
+                        ' /----------------------------------------------------------------\
+                        ' | MySql Select                                                   |
+                        ' | Get Spocosy event identifier using:-                           |
+                        ' |     * Event Name                                               | 
+                        ' |     * Event Date                                               |
+                        ' \----------------------------------------------------------------/
+                        cmdFuzzyEvent.CommandText = "select `id`, date_format(startDate, '%Y-%m-%d') from event AS e where e.`name` like @eventFuzzyName"
+                        Dim strFuzzyEventNameHome As String = strBetfairEventName.Substring(0, InStr(1, strBetfairEventName, " v "))
+                        Dim strFuzzyEventNameAway As String = strBetfairEventName.Substring(Len(strFuzzyEventNameHome) + 2)
+                        cmdFuzzyEvent.Parameters.AddWithValue("eventFuzzyName", "%" + strFuzzyEventNameHome + "%-%" + strFuzzyEventNameAway + "%")
+
+                        ' Reset matched id
+                        intEventIdSpocosy = 0
+
+                        Try
+                            cno3.Open()
+                            cmdFuzzyEvent.Connection = cno3
+                            drFuzzyEvent = cmdFuzzyEvent.ExecuteReader()
+                            While drFuzzyEvent.Read()
+
+                                Dim event_date As DateTime = drFuzzyEvent.GetDateTime(1)
+                                Dim strBetfairOpenDate As String = dtBetfairOpenDate.ToString("yyyy-MM-dd")
+                                Dim strEventDate As String = event_date.ToString("yyyy-MM-dd")
+                                If strBetfairOpenDate = strEventDate Then
+
+                                    ' Declare and populate fields
+                                    intEventIdSpocosy = drEvent.GetInt64(0)
+
+                                End If
+                            End While
+                        Catch ex As System.Exception
+                            drFuzzyEvent.Close()
+                        Finally
+                            cno3.Close()
+                        End Try
+
+                    End If
+
+
+                    '
+                    ' Get the bet offers
+                    '
                     If intEventIdSpocosy > 0 Then
 
                         Dim drBetOffer As MySqlDataReader
