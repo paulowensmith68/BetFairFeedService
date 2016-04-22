@@ -41,7 +41,7 @@ Public Class BetFairDatabaseClass
             'ListMarketCatalogue parameters
             Dim time = New TimeRange()
             time.From = Date.Now
-            time.To = Date.Now.AddDays(globalBetFairFootballDaysAhead)
+            time.To = Date.Now.AddDays(globalBetFairDaysAhead)
 
             marketFilter = New MarketFilter()
             marketFilter.EventTypeIds = eventypeIds
@@ -165,7 +165,7 @@ Public Class BetFairDatabaseClass
         Return s.marketId Is Nothing
 
     End Function
-    Public Sub MatchWithBookmakers(ByVal eventTypeId As Integer, ByVal marketTypeCode As String)
+    Public Sub MatchSoccerWithBookmakers(ByVal eventTypeId As Integer, ByVal marketTypeCode As String)
         '-----------------------------------------------------------------------*
         ' Sub Routine parameters                                                *
         ' -----------------------                                               *
@@ -224,9 +224,12 @@ Public Class BetFairDatabaseClass
                     ' |     * Event Name                                               | 
                     ' |     * Event Date                                               |
                     ' \----------------------------------------------------------------/
-                    cmdEvent.CommandText = "select `id`, date_format(startDate, '%Y-%m-%d') from event AS e where e.`name` =@eventName"
+                    cmdEvent.CommandText = "select `id`, date_format(startDate, '%Y-%m-%d') from event AS e where e.`name` =@eventName AND " &
+                                           "date(e.startdate) = str_to_date(@startDate, '%Y-%m-%d')"
                     strConvertedDeatils = ConvertEventName(eventTypeId, strBetfairEventName)
                     cmdEvent.Parameters.AddWithValue("eventName", strConvertedDeatils)
+                    Dim strBetfairOpenDate As String = dtBetfairOpenDate.ToString("yyyy-MM-dd")
+                    cmdEvent.Parameters.AddWithValue("startDate", strBetfairOpenDate)
 
                     ' Reset matched event id
                     intEventIdSpocosy = 0
@@ -238,7 +241,6 @@ Public Class BetFairDatabaseClass
                         While drEvent.Read()
 
                             Dim event_date As DateTime = drEvent.GetDateTime(1)
-                            Dim strBetfairOpenDate As String = dtBetfairOpenDate.ToString("yyyy-MM-dd")
                             Dim strEventDate As String = event_date.ToString("yyyy-MM-dd")
                             If strBetfairOpenDate = strEventDate Then
 
@@ -272,10 +274,12 @@ Public Class BetFairDatabaseClass
                         ' |     * Event Name                                               | 
                         ' |     * Event Date                                               |
                         ' \----------------------------------------------------------------/
-                        cmdFuzzyEvent.CommandText = "select `id`, date_format(startDate, '%Y-%m-%d') from event AS e where e.`name` like @eventFuzzyName"
+                        cmdFuzzyEvent.CommandText = "select `id`, date_format(startDate, '%Y-%m-%d') from event AS e where e.`name` like @eventFuzzyName AND " &
+                                                    "date(e.startdate) = str_to_date(@startDate, '%Y-%m-%d')"
                         Dim strFuzzyEventNameHome As String = strBetfairEventName.Substring(0, InStr(1, strBetfairEventName, " v "))
                         Dim strFuzzyEventNameAway As String = strBetfairEventName.Substring(Len(strFuzzyEventNameHome) + 2)
                         cmdFuzzyEvent.Parameters.AddWithValue("eventFuzzyName", "%" + strFuzzyEventNameHome + "%-%" + strFuzzyEventNameAway + "%")
+                        cmdFuzzyEvent.Parameters.AddWithValue("startDate", strBetfairOpenDate)
 
                         ' Reset matched id
                         intEventIdSpocosy = 0
@@ -287,7 +291,6 @@ Public Class BetFairDatabaseClass
                             While drFuzzyEvent.Read()
 
                                 Dim event_date As DateTime = drFuzzyEvent.GetDateTime(1)
-                                Dim strBetfairOpenDate As String = dtBetfairOpenDate.ToString("yyyy-MM-dd")
                                 Dim strEventDate As String = event_date.ToString("yyyy-MM-dd")
                                 If strBetfairOpenDate = strEventDate Then
 
@@ -297,7 +300,6 @@ Public Class BetFairDatabaseClass
                                 End If
                             End While
                         Catch ex As System.Exception
-                            drFuzzyEvent.Close()
                         Finally
                             cno3.Close()
                         End Try
@@ -374,37 +376,14 @@ Public Class BetFairDatabaseClass
                                         ' Calculate rating 
                                         Dim dblRating As Double = odds / dbBetfairPrice * 100
 
-                                        ' Resolve bookmaker to image
-                                        'Dim strBookmakerImage As String = "/images/noimage.png"
-                                        Dim strBookmakerImage As String = "/images/" + provider_name + ".png"
-
-                                        If provider_name = "Bet365" Then
-                                            strBookmakerImage = "/images/bet365.png"
-
-                                        ElseIf provider_name = "Betfair Exchange" Then
-                                            strBookmakerImage = "/images/betfair_h.gif"
-
-                                        ElseIf provider_name = "William Hill" Then
-                                            strBookmakerImage = "/images/wh.png"
-
-                                        ElseIf provider_name = "Coral" Then
-                                            strBookmakerImage = "/images/coral_h.gif"
-
-                                        ElseIf provider_name = "Ladbrokes" Then
-                                            strBookmakerImage = "/images/ladbrokes.png"
-
-                                        ElseIf provider_name = "Paddy Power" Then
-                                            strBookmakerImage = "/images/paddy_power.png"
-
-                                        ElseIf provider_name = "Stan James" Then
-                                            strBookmakerImage = "/images/stan.png"
-
-                                        ElseIf provider_name = "Intralot.it" Then
-                                            strBookmakerImage = "/images/intralot.png"
-
-                                        ElseIf provider_name = "24hPoker" Then
-                                            strBookmakerImage = "/images/24hPoker.png"
-                                        End If
+                                        ' Resolve bookmaker name to image
+                                        Dim strBookmakerImageName = provider_name
+                                        strBookmakerImageName = strBookmakerImageName.Replace(" ", "_")
+                                        strBookmakerImageName = strBookmakerImageName.Replace(".", "")
+                                        strBookmakerImageName = strBookmakerImageName.Replace("-", "_")
+                                        strBookmakerImageName = strBookmakerImageName.Replace("-", "_")
+                                        strBookmakerImageName = strBookmakerImageName.ToLower
+                                        Dim strBookmakerImage As String = "/images/" + strBookmakerImageName + ".png"
 
                                         'Create instance of Matched Event class
                                         newMatched = New MatchedEventClass With {
@@ -415,7 +394,7 @@ Public Class BetFairDatabaseClass
                                          .details = strBetfairEventName,
                                          .bookMaker = strBookmakerImage,
                                          .bet = strParticipant_name,
-                                         .exchange = "/images/betfair_h.gif",
+                                         .exchange = "/images/betfair_exchange.png",
                                          .type = marketTypeCode,
                                          .back = odds,
                                          .rating = dblRating
