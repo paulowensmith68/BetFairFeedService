@@ -144,21 +144,41 @@ Public Class Worker
                 BetFairDatabase3.PollBetFairEvents(1, "HALF_TIME", My.Settings.NumberOfUkEvents, marketCountriesUkOnly, True)
                 BetFairDatabase3 = Nothing
 
+                ' Match new odds
+                Dim BetFairDbOddsMatch2 As New BetFairDatabaseClass()
+                BetFairDbOddsMatch2.MatchSoccerWithBookmakers(1, "HALF_TIME")
+                BetFairDbOddsMatch2 = Nothing
+
                 Dim BetFairDatabase4 As New BetFairDatabaseClass()
                 BetFairDatabase4.PollBetFairEvents(1, "HALF_TIME_FULL_TIME", My.Settings.NumberOfUkEvents, marketCountriesUkOnly, True)
                 BetFairDatabase4 = Nothing
+
+                ' Match new odds
+                Dim BetFairDbOddsMatch3 As New BetFairDatabaseClass()
+                BetFairDbOddsMatch3.MatchSoccerWithBookmakers(1, "HALF_TIME_FULL_TIME")
+                BetFairDbOddsMatch3 = Nothing
 
                 Dim BetFairDatabase5 As New BetFairDatabaseClass()
                 BetFairDatabase5.PollBetFairEvents(1, "OVER_UNDER_25", My.Settings.NumberOfUkEvents, marketCountriesUkOnly, True)
                 BetFairDatabase5 = Nothing
 
+                ' Match new odds
+                Dim BetFairDbOddsMatch4 As New BetFairDatabaseClass()
+                BetFairDbOddsMatch4.MatchSoccerWithBookmakers(1, "OVER_UNDER_25")
+                BetFairDbOddsMatch4 = Nothing
+
                 Dim BetFairDatabase6 As New BetFairDatabaseClass()
                 BetFairDatabase6.PollBetFairEvents(1, "CORRECT_SCORE", My.Settings.NumberOfUkEvents, marketCountriesUkOnly, True)
                 BetFairDatabase6 = Nothing
 
-                Dim BetFairDatabase7 As New BetFairDatabaseClass()
-                BetFairDatabase7.PollBetFairEvents(1, "BOTH_TEAMS_TO_SCORE", My.Settings.NumberOfUkEvents, marketCountriesUkOnly, True)
-                BetFairDatabase7 = Nothing
+                ' Match new odds
+                Dim BetFairDbOddsMatch5 As New BetFairDatabaseClass()
+                BetFairDbOddsMatch5.MatchSoccerWithBookmakers(1, "CORRECT_SCORE")
+                BetFairDbOddsMatch5 = Nothing
+
+                'Dim BetFairDatabase7 As New BetFairDatabaseClass()
+                'BetFairDatabase7.PollBetFairEvents(1, "BOTH_TEAMS_TO_SCORE", My.Settings.NumberOfUkEvents, marketCountriesUkOnly, True)
+                'BetFairDatabase7 = Nothing
 
             End If
 
