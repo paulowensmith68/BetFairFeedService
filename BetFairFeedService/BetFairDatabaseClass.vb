@@ -438,11 +438,10 @@ Public Class BetFairDatabaseClass
                                         ' Resolve bookmaker name to image
                                         Dim strBookmakerImageName = provider_name
                                         strBookmakerImageName = strBookmakerImageName.Replace(" ", "_")
-                                        strBookmakerImageName = strBookmakerImageName.Replace(".", "")
-                                        strBookmakerImageName = strBookmakerImageName.Replace("-", "_")
+                                        strBookmakerImageName = strBookmakerImageName.Replace(".", "_")
                                         strBookmakerImageName = strBookmakerImageName.Replace("-", "_")
                                         strBookmakerImageName = strBookmakerImageName.ToLower
-                                        Dim strBookmakerImage As String = "/images/" + strBookmakerImageName + ".png"
+                                        Dim strBookmakerImage As String = "/images/" + strBookmakerImageName + ".gif"
 
                                         'Create instance of Matched Event class
                                         newMatched = New MatchedEventClass With {
