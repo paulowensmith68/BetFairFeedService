@@ -453,7 +453,7 @@ Public Class BetFairDatabaseClass
                                          .bookMaker = strBookmakerImage,
                                          .bookMakerName = provider_name,
                                          .bet = strParticipant_name,
-                                         .exchange = "/images/betfair_exchange.png",
+                                         .exchange = "/images/betfair_exchange.gif",
                                          .type = ConvertMarketTypeCodeToDisplay(marketTypeCode),
                                          .back = odds,
                                          .rating = dblRating
