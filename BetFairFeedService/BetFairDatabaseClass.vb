@@ -213,7 +213,9 @@ Public Class BetFairDatabaseClass
                     Dim cno2 As MySqlConnection = New MySqlConnection(connectionString)
                     Dim drEvent As MySqlDataReader
                     Dim cmdEvent As New MySqlCommand
-                    Dim strConvertedDeatils As String
+                    Dim strConvertedDetails As String
+                    Dim strBetfairHomeTeam As String = GetBetfairFootballTeam(True, strBetfairEventName)
+                    Dim strBetfairAwayTeam As String = GetBetfairFootballTeam(False, strBetfairEventName)
 
                     ' /----------------------------------------------------------------\
                     ' | MySql Select                                                   |
@@ -223,8 +225,8 @@ Public Class BetFairDatabaseClass
                     ' \----------------------------------------------------------------/
                     cmdEvent.CommandText = "select `id`, date_format(startDate, '%Y-%m-%d') from event AS e where e.`name` =@eventName AND " &
                                            "date(e.startdate) = str_to_date(@startDate, '%Y-%m-%d')"
-                    strConvertedDeatils = ConvertEventName(eventTypeId, strBetfairEventName)
-                    cmdEvent.Parameters.AddWithValue("eventName", strConvertedDeatils)
+                    strConvertedDetails = ConvertEventName(eventTypeId, strBetfairEventName)
+                    cmdEvent.Parameters.AddWithValue("eventName", strConvertedDetails)
                     Dim strBetfairOpenDate As String = dtBetfairOpenDate.ToString("yyyy-MM-dd")
                     cmdEvent.Parameters.AddWithValue("startDate", strBetfairOpenDate)
 
@@ -420,8 +422,10 @@ Public Class BetFairDatabaseClass
                                         Case "CORRECT_SCORE"
                                             If subtype = "score" Then
                                                 If strBetfairBetName = dparam.ToString + " - " + dparam2.ToString Then
-                                                    strParticipant_name = strBetfairBetName
-                                                    blnStore = True
+                                                    If strParticipant_name = strBetfairHomeTeam Then
+                                                        strParticipant_name = strBetfairBetName
+                                                        blnStore = True
+                                                    End If
                                                 End If
                                             End If
                                     End Select
@@ -515,6 +519,22 @@ Public Class BetFairDatabaseClass
             ' Horse Racing
             strReturn = eventName
 
+        End If
+
+        Return strReturn
+
+    End Function
+
+    Public Function GetBetfairFootballTeam(ByVal homeTeam As Boolean, ByVal eventName As String) As String
+
+        Dim strReturn As String = eventName
+
+        Dim strVersus As String = " v "
+        Dim posVersus As Integer = eventName.IndexOf(strVersus, 0)
+        If homeTeam Then
+            strReturn = eventName.Substring(0, posVersus)
+        Else
+            strReturn = eventName.Substring(posVersus + 3)
         End If
 
         Return strReturn
