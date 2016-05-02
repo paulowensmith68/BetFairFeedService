@@ -196,6 +196,102 @@ Namespace My
                 Me("ProcessCycleEverySecs") = value
             End Set
         End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
+        Public Property Process_MATCH_ODDS() As Boolean
+            Get
+                Return CType(Me("Process_MATCH_ODDS"),Boolean)
+            End Get
+            Set
+                Me("Process_MATCH_ODDS") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
+        Public Property Process_HALF_TIME() As Boolean
+            Get
+                Return CType(Me("Process_HALF_TIME"),Boolean)
+            End Get
+            Set
+                Me("Process_HALF_TIME") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
+        Public Property Process_HALF_TIME_FULL_TIME() As Boolean
+            Get
+                Return CType(Me("Process_HALF_TIME_FULL_TIME"),Boolean)
+            End Get
+            Set
+                Me("Process_HALF_TIME_FULL_TIME") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("False")>  _
+        Public Property Process_OVER_UNDER_25() As Boolean
+            Get
+                Return CType(Me("Process_OVER_UNDER_25"),Boolean)
+            End Get
+            Set
+                Me("Process_OVER_UNDER_25") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("False")>  _
+        Public Property Prcoess_CORRECT_SCORE() As Boolean
+            Get
+                Return CType(Me("Prcoess_CORRECT_SCORE"),Boolean)
+            End Get
+            Set
+                Me("Prcoess_CORRECT_SCORE") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("False")>  _
+        Public Property Process_BOTH_TEAMS_TO_SCORE() As Boolean
+            Get
+                Return CType(Me("Process_BOTH_TEAMS_TO_SCORE"),Boolean)
+            End Get
+            Set
+                Me("Process_BOTH_TEAMS_TO_SCORE") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("False")>  _
+        Public Property Prcoess_WIN() As Boolean
+            Get
+                Return CType(Me("Prcoess_WIN"),Boolean)
+            End Get
+            Set
+                Me("Prcoess_WIN") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("False")>  _
+        Public Property Process_PLACE() As Boolean
+            Get
+                Return CType(Me("Process_PLACE"),Boolean)
+            End Get
+            Set
+                Me("Process_PLACE") = value
+            End Set
+        End Property
     End Class
 End Namespace
 
