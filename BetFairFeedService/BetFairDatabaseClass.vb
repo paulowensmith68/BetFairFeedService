@@ -640,7 +640,7 @@ Public Class BetFairDatabaseClass
         Using SQLConnection As New MySqlConnection(connectionString)
             Using sqlCommand As New MySqlCommand()
                 With sqlCommand
-                    .CommandText = "delete From `oddsmatching`.`betfair_football_event` where id =@id"
+                    .CommandText = "delete From `betfair_football_event` where id =@id"
                     .Connection = SQLConnection
                     .CommandType = CommandType.Text
                     .Parameters.Add(New MySqlParameter("id", id))
@@ -687,7 +687,7 @@ Public Class BetFairDatabaseClass
 
         ' Establish delete command
         cmd_del.Connection = cno
-        cmd_del.CommandText = "delete From `oddsmatching`.`betfair_event` where eventTypeId =@eventTypeId And marketTypeCode =@marketTypeCode"
+        cmd_del.CommandText = "delete From `betfair_event` where eventTypeId =@eventTypeId And marketTypeCode =@marketTypeCode"
         cmd_del.Parameters.Add("@eventTypeId", MySqlDbType.Int16)
         cmd_del.Parameters.Add("@marketTypeCode", MySqlDbType.String)
 
@@ -705,7 +705,7 @@ Public Class BetFairDatabaseClass
         cmd.Parameters.Add("@betName", MySqlDbType.String)
         cmd.Parameters.Add("@marketTypeCode", MySqlDbType.String)
         cmd.Parameters.Add("@marketName", MySqlDbType.String)
-        cmd.CommandText = "INSERT INTO `oddsmatching`.`betfair_event` (`eventTypeId`,`eventId`,`marketId`,`name`,`countryCode`,`timezone`,`openDate`,`price`,`size`,`betName`,`marketTypeCode`,`marketName`) VALUES (@eventTypeId,@eventId,@marketId,@name,@countryCode,@timezone,@openDate,@price,@size,@betName,@marketTypeCode,@marketName)"
+        cmd.CommandText = "INSERT INTO `betfair_event` (`eventTypeId`,`eventId`,`marketId`,`name`,`countryCode`,`timezone`,`openDate`,`price`,`size`,`betName`,`marketTypeCode`,`marketName`) VALUES (@eventTypeId,@eventId,@marketId,@name,@countryCode,@timezone,@openDate,@price,@size,@betName,@marketTypeCode,@marketName)"
 
         num = 0
         Try
@@ -785,7 +785,7 @@ Public Class BetFairDatabaseClass
 
         ' Establish delete command
         cmd_del.Connection = cno
-        cmd_del.CommandText = "delete From `oddsmatching`.`matched_event` where betfairEventTypeId =@eventTypeId And betfairMarketTypeCode =@marketTypeCode"
+        cmd_del.CommandText = "delete From `matched_event` where betfairEventTypeId =@eventTypeId And betfairMarketTypeCode =@marketTypeCode"
         cmd_del.Parameters.Add("@eventTypeId", MySqlDbType.Int16)
         cmd_del.Parameters.Add("@marketTypeCode", MySqlDbType.String)
 
@@ -810,7 +810,7 @@ Public Class BetFairDatabaseClass
         cmd.Parameters.Add("@countryCode", MySqlDbType.String)
         cmd.Parameters.Add("@timezone", MySqlDbType.String)
 
-        cmd.CommandText = "INSERT INTO `oddsmatching`.`matched_event` (`eventDate`,`sport`,`details`,`betName`,`marketName`,`rating`,`info`,`bookmaker`,`bookmaker_name`,`back`,`exchange`,`lay`,`size`,`betfairEventTypeId`,`betfairMarketTypeCode`,`competitionName`,`countryCode`,`timezone`) VALUES (@eventDate,@sport,@details,@betName,@marketName,@rating,@info,@bookmaker,@bookmaker_name,@back,@exchange,@lay,@size,@betfairEventTypeId,@betfairMarketTypeCode,@competitionName,@countryCode,@timezone)"
+        cmd.CommandText = "INSERT INTO `matched_event` (`eventDate`,`sport`,`details`,`betName`,`marketName`,`rating`,`info`,`bookmaker`,`bookmaker_name`,`back`,`exchange`,`lay`,`size`,`betfairEventTypeId`,`betfairMarketTypeCode`,`competitionName`,`countryCode`,`timezone`) VALUES (@eventDate,@sport,@details,@betName,@marketName,@rating,@info,@bookmaker,@bookmaker_name,@back,@exchange,@lay,@size,@betfairEventTypeId,@betfairMarketTypeCode,@competitionName,@countryCode,@timezone)"
 
         num = 0
         Try

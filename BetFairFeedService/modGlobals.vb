@@ -2,7 +2,7 @@
     Public Account As New AccountClass()
 
     '-------------------------------------------------
-    '-   OddsMatching database connection string                             -
+    '-   Database connection string                  -
     '-------------------------------------------------
     Public globalConnectionString = My.Settings.ConnectionString
 
