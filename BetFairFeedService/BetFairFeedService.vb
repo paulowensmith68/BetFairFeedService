@@ -113,7 +113,7 @@ Public Class Worker
             Dim marketCountriesUkOnly As HashSet(Of String)
             marketCountriesUkOnly = New HashSet(Of String)({"GB"})
             Dim marketCountriesEurope As HashSet(Of String)
-            marketCountriesEurope = New HashSet(Of String)({"FR", "DE", "IT", "ES"})
+            marketCountriesEurope = New HashSet(Of String)({"FR", "DE", "IT", "ES", "PT", "NL", "GR"})
 
             ' Refresh database from BetFair API interface
 

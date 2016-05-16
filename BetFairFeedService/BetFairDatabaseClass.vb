@@ -1,7 +1,6 @@
 ﻿Imports MySql.Data.MySqlClient
 Imports BetFairFeedService.Api_ng_sample_code.TO
 Imports BetFairFeedService.Api_ng_sample_code
-
 Public Class BetFairDatabaseClass
 
     ' Holds the connection string to the database used.
@@ -275,8 +274,8 @@ Public Class BetFairDatabaseClass
                         ' \----------------------------------------------------------------/
                         cmdFuzzyEvent.CommandText = "select `id`, date_format(startDate, '%Y-%m-%d') from event AS e where e.`name` like @eventFuzzyName AND " &
                                                     "date(e.startdate) = str_to_date(@startDate, '%Y-%m-%d')"
-                        Dim strFuzzyEventNameHome As String = strBetfairEventName.Substring(0, InStr(1, strBetfairEventName, " v "))
-                        Dim strFuzzyEventNameAway As String = strBetfairEventName.Substring(Len(strFuzzyEventNameHome) + 2)
+                        Dim strFuzzyEventNameHome As String = strBetfairEventName.Substring(0, InStr(1, strBetfairEventName, " v ")).Trim
+                        Dim strFuzzyEventNameAway As String = strBetfairEventName.Substring(Len(strFuzzyEventNameHome) + 2).Trim
                         cmdFuzzyEvent.Parameters.AddWithValue("eventFuzzyName", "%" + strFuzzyEventNameHome + "%-%" + strFuzzyEventNameAway + "%")
                         cmdFuzzyEvent.Parameters.AddWithValue("startDate", strBetfairOpenDate)
 
@@ -328,8 +327,6 @@ Public Class BetFairDatabaseClass
                                                 "ou.`del`='no' AND " &
                                                 "ou.`type` =@matchTypeCode AND " &
                                                 "ou.`scope` =@scope AND " &
-                                                "ou.`dparam` in(@dparam) AND " &
-                                                "ou.`dparam2` in(@dparam) AND " &
                                                 "bt.`del`='no' AND " &
                                                 "op.`del`='no' AND " &
                                                 "bt.`active`='yes' AND " &
@@ -338,23 +335,18 @@ Public Class BetFairDatabaseClass
                         Select Case marketTypeCode
                             Case "MATCH_ODDS"
                                 cmdBetOffer.Parameters.AddWithValue("scope", "ord")
-                                cmdBetOffer.Parameters.AddWithValue("dparam", 0)
                                 cmdBetOffer.Parameters.AddWithValue("matchTypeCode", "1x2")
                             Case "HALF_TIME"
                                 cmdBetOffer.Parameters.AddWithValue("scope", "1h")
-                                cmdBetOffer.Parameters.AddWithValue("dparam", 0)
                                 cmdBetOffer.Parameters.AddWithValue("matchTypeCode", "1x2")
                             Case "HALF_TIME_FULL_TIME"
                                 cmdBetOffer.Parameters.AddWithValue("scope", "ord")
-                                cmdBetOffer.Parameters.AddWithValue("dparam", 0)
                                 cmdBetOffer.Parameters.AddWithValue("matchTypeCode", "ht_ft")
                             Case "OVER_UNDER_25"
                                 cmdBetOffer.Parameters.AddWithValue("scope", "ord")
-                                cmdBetOffer.Parameters.AddWithValue("dparam", 2.5)
                                 cmdBetOffer.Parameters.AddWithValue("matchTypeCode", "ou")
                             Case "CORRECT_SCORE"
                                 cmdBetOffer.Parameters.AddWithValue("scope", "ord")
-                                cmdBetOffer.Parameters.AddWithValue("dparam", "0,1,2,3,4")
                                 cmdBetOffer.Parameters.AddWithValue("matchTypeCode", "cs")
                         End Select
 
@@ -444,17 +436,20 @@ Public Class BetFairDatabaseClass
                                             End If
 
                                         Case "OVER_UNDER_25"
-                                            If subtype = "under" Then
-                                                If strBetfairBetName = "Under 2.5 Goals" Then
-                                                    strParticipant_name = "Under 2.5"
-                                                    blnStore = True
+                                            If dparam = 2.5 Then
+                                                If subtype = "under" Then
+                                                    If strBetfairBetName = "Under 2.5 Goals" Then
+                                                        strParticipant_name = "Under 2.5"
+                                                        blnStore = True
+                                                    End If
                                                 End If
-                                            End If
-                                            If subtype = "over" Then
-                                                If strBetfairBetName = "Over 2.5 Goals" Then
-                                                    strParticipant_name = "Over 2.5"
-                                                    blnStore = True
+                                                If subtype = "over" Then
+                                                    If strBetfairBetName = "Over 2.5 Goals" Then
+                                                        strParticipant_name = "Over 2.5"
+                                                        blnStore = True
+                                                    End If
                                                 End If
+
                                             End If
 
                                         Case "CORRECT_SCORE"
