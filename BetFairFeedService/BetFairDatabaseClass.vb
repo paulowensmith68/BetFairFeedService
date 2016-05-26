@@ -97,7 +97,7 @@ Public Class BetFairDatabaseClass
                         Dim gmt As TimeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time")
                         gmtOpenDate = TimeZoneInfo.ConvertTimeFromUtc(gmtOpenDate, gmt)
 
-                        For i = 0 To book.Runners.Count - 1
+                        For i = 0 To layBet.Runners.Count - 1
 
                             If layBet.Runners(i).ExchangePrices.AvailableToLay.Count > 0 Then
 
@@ -199,6 +199,7 @@ Public Class BetFairDatabaseClass
 
                     ' Declare for later
                     Dim intEventIdSpocosy As Integer
+                    Dim strEventStageSpocosy As String = ""
 
                     ' Declare and populate fields
                     Dim strBetfairEventName As String = drBetfairEvents.GetString(0)
@@ -222,7 +223,7 @@ Public Class BetFairDatabaseClass
                     ' |     * Event Name                                               | 
                     ' |     * Event Date                                               |
                     ' \----------------------------------------------------------------/
-                    cmdEvent.CommandText = "select `id`, date_format(startDate, '%Y-%m-%d') from event AS e where e.`name` =@eventName AND " &
+                    cmdEvent.CommandText = "select e.`id`, date_format(e.startDate, '%Y-%m-%d'), ts.name from event AS e INNER JOIN tournament_stage AS ts ON e.tournament_stageFK = ts.id where e.`name` =@eventName AND " &
                                            "date(e.startdate) = str_to_date(@startDate, '%Y-%m-%d')"
                     strConvertedDetails = ConvertEventName(eventTypeId, strBetfairEventName)
                     cmdEvent.Parameters.AddWithValue("eventName", strConvertedDetails)
@@ -244,6 +245,7 @@ Public Class BetFairDatabaseClass
 
                                 ' Declare and populate fields
                                 intEventIdSpocosy = drEvent.GetInt64(0)
+                                strEventStageSpocosy = drEvent.GetString(2)
 
                             End If
                             ' TO ADD
@@ -272,7 +274,7 @@ Public Class BetFairDatabaseClass
                         ' |     * Event Name                                               | 
                         ' |     * Event Date                                               |
                         ' \----------------------------------------------------------------/
-                        cmdFuzzyEvent.CommandText = "select `id`, date_format(startDate, '%Y-%m-%d') from event AS e where e.`name` like @eventFuzzyName AND " &
+                        cmdFuzzyEvent.CommandText = "select e.`id`, date_format(e.startDate, '%Y-%m-%d'), ts.name from event AS e INNER JOIN tournament_stage AS ts ON e.tournament_stageFK = ts.id where e.`name` like @eventFuzzyName AND " &
                                                     "date(e.startdate) = str_to_date(@startDate, '%Y-%m-%d')"
                         Dim strFuzzyEventNameHome As String = strBetfairEventName.Substring(0, InStr(1, strBetfairEventName, " v ")).Trim
                         Dim strFuzzyEventNameAway As String = strBetfairEventName.Substring(Len(strFuzzyEventNameHome) + 2).Trim
@@ -294,6 +296,7 @@ Public Class BetFairDatabaseClass
 
                                     ' Declare and populate fields
                                     intEventIdSpocosy = drFuzzyEvent.GetInt64(0)
+                                    strEventStageSpocosy = drEvent.GetString(2)
 
                                 End If
                             End While
@@ -501,7 +504,8 @@ Public Class BetFairDatabaseClass
                                          .exchange = "/images/betfair_exchange.gif",
                                          .type = ConvertMarketTypeCodeToDisplay(marketTypeCode),
                                          .back = odds,
-                                         .rating = dblRating
+                                         .rating = dblRating,
+                                         .competitionName = strEventStageSpocosy
                                         }
 
                                         ' Add to list
@@ -843,7 +847,7 @@ Public Class BetFairDatabaseClass
                     cmd.Parameters("@size").Value = matchedList(i).available
                     cmd.Parameters("@betfairEventTypeId").Value = matchedList(i).eventTypeId
                     cmd.Parameters("@betfairMarketTypeCode").Value = marketTypeCode
-                    cmd.Parameters("@competitionName").Value = "tbc"
+                    cmd.Parameters("@competitionName").Value = matchedList(i).competitionName
                     cmd.Parameters("@countryCode").Value = "GB"
                     cmd.Parameters("@timezone").Value = "tbc"
 
