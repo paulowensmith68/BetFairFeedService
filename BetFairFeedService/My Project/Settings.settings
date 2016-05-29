@@ -44,7 +44,7 @@
     <Setting Name="Process_HALF_TIME_FULL_TIME" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="Process_OVER_UNDER_25" Type="System.Boolean" Scope="User">
+    <Setting Name="Process_OVER_UNDER" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Prcoess_CORRECT_SCORE" Type="System.Boolean" Scope="User">
@@ -65,6 +65,9 @@
   &lt;ConnectionString&gt;Database=OddsMatching;Data Source=eu-cdbr-azure-north-e.cloudapp.net;User Id=b083cb50265fec;Password=263fb5f7;persistsecurityinfo=True&lt;/ConnectionString&gt;
 &lt;/SerializableConnectionString&gt;</DesignTimeValue>
       <Value Profile="(Default)">Database=OddsMatching;Data Source=eu-cdbr-azure-north-e.cloudapp.net;User Id=b083cb50265fec;Password=263fb5f7;persistsecurityinfo=True</Value>
+    </Setting>
+    <Setting Name="CompetitionEventIds" Type="System.String" Scope="User">
+      <Value Profile="(Default)">78601, 4527196</Value>
     </Setting>
   </Settings>
 </SettingsFile>

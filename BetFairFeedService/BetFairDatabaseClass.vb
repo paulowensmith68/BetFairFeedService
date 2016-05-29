@@ -62,6 +62,8 @@ Public Class BetFairDatabaseClass
             Dim marketProjections As ISet(Of MarketProjection) = New HashSet(Of MarketProjection)()
             marketProjections.Add(MarketProjection.RUNNER_METADATA)
             marketProjections.Add(MarketProjection.EVENT)
+            marketProjections.Add(MarketProjection.COMPETITION)
+
 
             Dim marketCatalogues = client.listMarketCatalogue(marketFilter, marketProjections, marketSort, maxResults)
             gobjEvent.WriteToEventLog("BetFairDatabaseClass : Response from MarketCatalogue (event objects) : " + marketCatalogues.Count.ToString, EventLogEntryType.Information)
@@ -158,6 +160,152 @@ Public Class BetFairDatabaseClass
         gobjEvent.WriteToEventLog("BetFairDatabaseClass : Response from Database Update: : " + strResult, EventLogEntryType.Information)
 
     End Sub
+    Public Sub PollBetFairCompetition(eventTypeId As Integer, marketTypeCode As String, maxResults As String, competitionIds As HashSet(Of String), blnDeleteAll As Boolean)
+
+        Dim Account As New AccountClass()
+        Dim newEvent As BefFairFootballEventClass
+
+        ' Login
+        Account.Login()
+
+        Dim client As IClient = Nothing
+        Dim clientType As String = Nothing
+        client = New JsonRpcClient(globalBetFairUrl, globalBetFairAppKey, globalBetFairToken)
+        gobjEvent.WriteToEventLog("BetFairDatabaseClass : Starting to get list from marketCatalogue for Event Id: " + eventTypeId.ToString + " Market Type :" + marketTypeCode + " Competition Id: " + DisplaySet(competitionIds), EventLogEntryType.Information)
+
+        Try
+
+            Dim marketFilter = New MarketFilter()
+            Dim eventTypes = client.listEventTypes(marketFilter)
+            Dim eventypeIds As ISet(Of String) = New HashSet(Of String)()
+
+            ' Football is eventId 1
+            eventypeIds.Add(eventTypeId)
+
+            'ListMarketCatalogue parameters
+            Dim time = New TimeRange()
+            time.From = Date.Now
+            time.To = Date.Now.AddDays(globalBetFairDaysAhead)
+
+            marketFilter = New MarketFilter()
+            marketFilter.EventTypeIds = eventypeIds
+            marketFilter.MarketStartTime = time
+
+            ' Setup competition required
+            marketFilter.CompetitionIds = competitionIds
+
+            ' Set-up market type codes e.g. WIN or MATCH ODDS
+            marketFilter.MarketTypeCodes = New HashSet(Of String)() From {marketTypeCode}
+
+            ' Set InPlayOnly : Restrict to markets that are currently in play if True or are not currently in play if false. If not specified, returns both.
+            marketFilter.InPlayOnly = False
+
+            ' Set-up
+            Dim marketSort = Api_ng_sample_code.TO.MarketSort.MAXIMUM_TRADED
+
+            ' Set-up market projection
+            Dim marketProjections As ISet(Of MarketProjection) = New HashSet(Of MarketProjection)()
+            marketProjections.Add(MarketProjection.RUNNER_METADATA)
+            marketProjections.Add(MarketProjection.EVENT)
+            marketProjections.Add(MarketProjection.COMPETITION)
+
+
+            Dim marketCatalogues = client.listMarketCatalogue(marketFilter, marketProjections, marketSort, maxResults)
+            gobjEvent.WriteToEventLog("BetFairDatabaseClass : Response from MarketCatalogue (event objects) : " + marketCatalogues.Count.ToString, EventLogEntryType.Information)
+
+            For Each book In marketCatalogues
+                Dim marketId As String = book.MarketId
+                Dim marketIds As IList(Of String) = New List(Of String)()
+                marketIds.Add(marketId)
+
+                Dim priceData As ISet(Of PriceData) = New HashSet(Of PriceData)()
+                'get all prices from the exchange
+                priceData.Add(Api_ng_sample_code.TO.PriceData.EX_BEST_OFFERS)
+                priceData.Add(Api_ng_sample_code.TO.PriceData.EX_TRADED)
+
+                Dim priceProjection = New PriceProjection()
+                priceProjection.PriceData = priceData
+
+                Dim marketBook = client.listMarketBook(marketIds, priceProjection)
+
+                ' Look through the market books, there should only be 1
+                For Each layBet In marketBook
+
+                    If marketBook.Count = 1 Then
+
+                        ' Processing event...
+                        gobjEvent.WriteToEventLog("BetFairDatabaseClass : Processing event : " + book.Event.Name, EventLogEntryType.Information)
+
+                        ' Convert date to localtime
+                        Dim gmtOpenDate As DateTime
+                        gmtOpenDate = book.Event.OpenDate
+
+                        'GMT Standard Time
+                        Dim gmt As TimeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time")
+                        gmtOpenDate = TimeZoneInfo.ConvertTimeFromUtc(gmtOpenDate, gmt)
+
+                        For i = 0 To layBet.Runners.Count - 1
+
+                            If layBet.Runners(i).ExchangePrices.AvailableToLay.Count > 0 Then
+
+                                If layBet.Runners(i).SelectionId = book.Runners(i).SelectionId Then
+
+                                    'Create instance of database class
+                                    newEvent = New BefFairFootballEventClass With {
+                                     .eventTypeId = eventTypeId,
+                                     .eventId = book.Event.Id.ToString,
+                                     .name = book.Event.Name,
+                                     .timezone = book.Event.Timezone,
+                                     .countryCode = book.Event.CountryCode,
+                                     .openDate = gmtOpenDate,
+                                     .marketId = book.MarketId,
+                                     .marketTypeCode = marketTypeCode,
+                                     .marketName = book.MarketName,
+                                     .betName = book.Runners(i).RunnerName,
+                                     .price = layBet.Runners(i).ExchangePrices.AvailableToLay(0).Price,
+                                     .size = layBet.Runners(i).ExchangePrices.AvailableToLay(0).Size
+                                    }
+
+                                    ' Add to list
+                                    eventList.Add(newEvent)
+
+                                Else
+                                    gobjEvent.WriteToEventLog("BetFairDatabaseClass : SelectionId's do not match between marketCatalogue and marketBook for : " + book.Event.Name, EventLogEntryType.Warning)
+                                End If
+
+                            End If
+
+                        Next ' End of runners
+
+                    End If
+
+                Next ' End of layBet
+
+            Next ' End of book
+
+        Catch apiExcepion As APINGException
+            gobjEvent.WriteToEventLog("BetFairDatabaseClass : Error getting Api data, APINGExcepion msg : " + apiExcepion.Message, EventLogEntryType.Error)
+            Exit Sub
+        Catch ex As System.Exception
+            gobjEvent.WriteToEventLog("BetFairDatabaseClass : Error getting Api data, system exception: " + ex.Message, EventLogEntryType.Error)
+            Exit Sub
+
+        Finally
+
+            ' Logout
+            Account.Logout()
+
+        End Try
+
+
+        '' Write to database
+        Dim strResult As String
+        gobjEvent.WriteToEventLog("BetFairDatabaseClass : Starting database update . . . . ", EventLogEntryType.Information)
+        strResult = WriteEventList(eventTypeId, marketTypeCode, blnDeleteAll)
+        gobjEvent.WriteToEventLog("BetFairDatabaseClass : Response from Database Update: : " + strResult, EventLogEntryType.Information)
+
+    End Sub
+
     Private Shared Function MarketIdNothing(ByVal s As BefFairFootballEventClass) _
         As Boolean
 
@@ -345,7 +493,31 @@ Public Class BetFairDatabaseClass
                             Case "HALF_TIME_FULL_TIME"
                                 cmdBetOffer.Parameters.AddWithValue("scope", "ord")
                                 cmdBetOffer.Parameters.AddWithValue("matchTypeCode", "ht_ft")
+                            Case "OVER_UNDER_05"
+                                cmdBetOffer.Parameters.AddWithValue("scope", "ord")
+                                cmdBetOffer.Parameters.AddWithValue("matchTypeCode", "ou")
+                            Case "OVER_UNDER_15"
+                                cmdBetOffer.Parameters.AddWithValue("scope", "ord")
+                                cmdBetOffer.Parameters.AddWithValue("matchTypeCode", "ou")
                             Case "OVER_UNDER_25"
+                                cmdBetOffer.Parameters.AddWithValue("scope", "ord")
+                                cmdBetOffer.Parameters.AddWithValue("matchTypeCode", "ou")
+                            Case "OVER_UNDER_35"
+                                cmdBetOffer.Parameters.AddWithValue("scope", "ord")
+                                cmdBetOffer.Parameters.AddWithValue("matchTypeCode", "ou")
+                            Case "OVER_UNDER_45"
+                                cmdBetOffer.Parameters.AddWithValue("scope", "ord")
+                                cmdBetOffer.Parameters.AddWithValue("matchTypeCode", "ou")
+                            Case "OVER_UNDER_55"
+                                cmdBetOffer.Parameters.AddWithValue("scope", "ord")
+                                cmdBetOffer.Parameters.AddWithValue("matchTypeCode", "ou")
+                            Case "OVER_UNDER_65"
+                                cmdBetOffer.Parameters.AddWithValue("scope", "ord")
+                                cmdBetOffer.Parameters.AddWithValue("matchTypeCode", "ou")
+                            Case "OVER_UNDER_75"
+                                cmdBetOffer.Parameters.AddWithValue("scope", "ord")
+                                cmdBetOffer.Parameters.AddWithValue("matchTypeCode", "ou")
+                            Case "OVER_UNDER_85"
                                 cmdBetOffer.Parameters.AddWithValue("scope", "ord")
                                 cmdBetOffer.Parameters.AddWithValue("matchTypeCode", "ou")
                             Case "CORRECT_SCORE"
@@ -438,6 +610,38 @@ Public Class BetFairDatabaseClass
                                                 End If
                                             End If
 
+                                        Case "OVER_UNDER_05"
+                                            If dparam = 0.5 Then
+                                                If subtype = "under" Then
+                                                    If strBetfairBetName = "Under 0.5 Goals" Then
+                                                        strParticipant_name = "Under 0.5"
+                                                        blnStore = True
+                                                    End If
+                                                End If
+                                                If subtype = "over" Then
+                                                    If strBetfairBetName = "Over 0.5 Goals" Then
+                                                        strParticipant_name = "Over 0.5"
+                                                        blnStore = True
+                                                    End If
+                                                End If
+
+                                            End If
+                                        Case "OVER_UNDER_15"
+                                            If dparam = 1.5 Then
+                                                If subtype = "under" Then
+                                                    If strBetfairBetName = "Under 1.5 Goals" Then
+                                                        strParticipant_name = "Under 1.5"
+                                                        blnStore = True
+                                                    End If
+                                                End If
+                                                If subtype = "over" Then
+                                                    If strBetfairBetName = "Over 1.5 Goals" Then
+                                                        strParticipant_name = "Over 1.5"
+                                                        blnStore = True
+                                                    End If
+                                                End If
+
+                                            End If
                                         Case "OVER_UNDER_25"
                                             If dparam = 2.5 Then
                                                 If subtype = "under" Then
@@ -454,7 +658,102 @@ Public Class BetFairDatabaseClass
                                                 End If
 
                                             End If
+                                        Case "OVER_UNDER_35"
+                                            If dparam = 3.5 Then
+                                                If subtype = "under" Then
+                                                    If strBetfairBetName = "Under 3.5 Goals" Then
+                                                        strParticipant_name = "Under 3.5"
+                                                        blnStore = True
+                                                    End If
+                                                End If
+                                                If subtype = "over" Then
+                                                    If strBetfairBetName = "Over 3.5 Goals" Then
+                                                        strParticipant_name = "Over 3.5"
+                                                        blnStore = True
+                                                    End If
+                                                End If
 
+                                            End If
+                                        Case "OVER_UNDER_45"
+                                            If dparam = 4.5 Then
+                                                If subtype = "under" Then
+                                                    If strBetfairBetName = "Under 4.5 Goals" Then
+                                                        strParticipant_name = "Under 4.5"
+                                                        blnStore = True
+                                                    End If
+                                                End If
+                                                If subtype = "over" Then
+                                                    If strBetfairBetName = "Over 4.5 Goals" Then
+                                                        strParticipant_name = "Over 4.5"
+                                                        blnStore = True
+                                                    End If
+                                                End If
+
+                                            End If
+                                        Case "OVER_UNDER_55"
+                                            If dparam = 5.5 Then
+                                                If subtype = "under" Then
+                                                    If strBetfairBetName = "Under 5.5 Goals" Then
+                                                        strParticipant_name = "Under 5.5"
+                                                        blnStore = True
+                                                    End If
+                                                End If
+                                                If subtype = "over" Then
+                                                    If strBetfairBetName = "Over 5.5 Goals" Then
+                                                        strParticipant_name = "Over 5.5"
+                                                        blnStore = True
+                                                    End If
+                                                End If
+
+                                            End If
+                                        Case "OVER_UNDER_65"
+                                            If dparam = 6.5 Then
+                                                If subtype = "under" Then
+                                                    If strBetfairBetName = "Under 6.5 Goals" Then
+                                                        strParticipant_name = "Under 6.5"
+                                                        blnStore = True
+                                                    End If
+                                                End If
+                                                If subtype = "over" Then
+                                                    If strBetfairBetName = "Over 6.5 Goals" Then
+                                                        strParticipant_name = "Over 6.5"
+                                                        blnStore = True
+                                                    End If
+                                                End If
+
+                                            End If
+                                        Case "OVER_UNDER_75"
+                                            If dparam = 7.5 Then
+                                                If subtype = "under" Then
+                                                    If strBetfairBetName = "Under 7.5 Goals" Then
+                                                        strParticipant_name = "Under 7.5"
+                                                        blnStore = True
+                                                    End If
+                                                End If
+                                                If subtype = "over" Then
+                                                    If strBetfairBetName = "Over 7.5 Goals" Then
+                                                        strParticipant_name = "Over 7.5"
+                                                        blnStore = True
+                                                    End If
+                                                End If
+
+                                            End If
+                                        Case "OVER_UNDER_85"
+                                            If dparam = 8.5 Then
+                                                If subtype = "under" Then
+                                                    If strBetfairBetName = "Under 8.5 Goals" Then
+                                                        strParticipant_name = "Under 8.5"
+                                                        blnStore = True
+                                                    End If
+                                                End If
+                                                If subtype = "over" Then
+                                                    If strBetfairBetName = "Over 8.5 Goals" Then
+                                                        strParticipant_name = "Over 8.5"
+                                                        blnStore = True
+                                                    End If
+                                                End If
+
+                                            End If
                                         Case "CORRECT_SCORE"
                                             If subtype = "score" Then
                                                 ' Check which way around correct score is stored
@@ -618,8 +917,32 @@ Public Class BetFairDatabaseClass
             Case "HALF_TIME_FULL_TIME"
                 strReturn = "HT/FT"
 
+            Case "OVER_UNDER_05"
+                strReturn = "Over Under 0.5"
+
+            Case "OVER_UNDER_15"
+                strReturn = "Over Under 1.5"
+
             Case "OVER_UNDER_25"
-                strReturn = "Over Under"
+                strReturn = "Over Under 2.5"
+
+            Case "OVER_UNDER_35"
+                strReturn = "Over Under 3.5"
+
+            Case "OVER_UNDER_45"
+                strReturn = "Over Under 4.5"
+
+            Case "OVER_UNDER_55"
+                strReturn = "Over Under 5.5"
+
+            Case "OVER_UNDER_65"
+                strReturn = "Over Under 6.5"
+
+            Case "OVER_UNDER_75"
+                strReturn = "Over Under 7.5"
+
+            Case "OVER_UNDER_85"
+                strReturn = "Over Under 8.5"
 
             Case "CORRECT_SCORE"
                 strReturn = "Correct Score"

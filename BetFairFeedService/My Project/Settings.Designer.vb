@@ -225,12 +225,12 @@ Namespace My
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.Configuration.DefaultSettingValueAttribute("False")>  _
-        Public Property Process_OVER_UNDER_25() As Boolean
+        Public Property Process_OVER_UNDER() As Boolean
             Get
-                Return CType(Me("Process_OVER_UNDER_25"),Boolean)
+                Return CType(Me("Process_OVER_UNDER"),Boolean)
             End Get
             Set
-                Me("Process_OVER_UNDER_25") = value
+                Me("Process_OVER_UNDER") = value
             End Set
         End Property
         
@@ -291,6 +291,18 @@ Namespace My
             Get
                 Return CType(Me("ConnectionString"),String)
             End Get
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("78601, 4527196")>  _
+        Public Property CompetitionEventIds() As String
+            Get
+                Return CType(Me("CompetitionEventIds"),String)
+            End Get
+            Set
+                Me("CompetitionEventIds") = value
+            End Set
         End Property
     End Class
 End Namespace
